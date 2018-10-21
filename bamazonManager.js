@@ -144,3 +144,59 @@ function add() {
       })
   })
 }
+
+function newProduct() {
+  // prompt for new product information
+  inquirer
+    .prompt([
+      {
+        name: "productName",
+        type: "input",
+        message: "What item would you like to add?"
+      },
+      {
+        name: "departmentName",
+        type: "input",
+        message: "What department will you assign it to?"
+      },
+      {
+        name: "price",
+        type: "input",
+        message: "What is the product's price?",
+        validate: function(value) {
+          if (!isNaN(value)) {
+            return true;
+          }
+          return false;
+        }
+      },
+      {
+        name: "quantity",
+        type: "input",
+        message: "How many units?",
+        validate: function(value) {
+          if (!isNaN(value)) {
+            return true;
+          }
+          return false;
+        }
+      }
+    ])
+    .then(function(answer) {
+      // inserting the new product into the database
+      connection.query(
+        "INSERT INTO products SET?",
+        {
+          product_name: answer.productName,
+          department_name: answer.departmentName,
+          price: answer.price,
+          stock_quantity: answer.quantity
+        },
+        function(error) {
+          if (error) throw error;
+          console.log("New Product added");
+          start();
+        }
+      )
+    })
+}
