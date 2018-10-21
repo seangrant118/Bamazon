@@ -64,3 +64,19 @@ function view() {
     start();
   })
 }
+
+// function to view low inventory
+function lowInventory() {
+  connection.query("SELECT * FROM products", function(err, results) {
+    if (err) throw err;
+    for (let i = 0; i < results.length; i++) {
+      if (results[i].stock_quantity < 5) {
+        console.log(`
+        LOW QUANTITY:
+        Product Name: ${results[i].product_name}
+        Quantity: ${results[i].stock_quantity}`)
+      }
+      start();
+    }
+  })
+}
