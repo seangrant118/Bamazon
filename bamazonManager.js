@@ -80,3 +80,57 @@ function lowInventory() {
     }
   })
 }
+
+// function to add more inventory
+function add() {
+  connection.query("SELECT * FROM products", function(err, results) {
+    if (err) throw err;
+
+    // prompt which product you'd like more inventory added to
+    inquirer
+      .prompt([
+        {
+          name: "addInventory",
+          type: "list",
+          message: "Which product would you like to add inventory for?",
+          choices: function() {
+            let choiceArray = [];
+            for (let i = 0; i < results.length; i++) {
+              choiceArray.push(results[i].product_name);
+            }
+            return choiceArray;
+          }
+        },
+        {
+          name: "addQuantity",
+          type: "input",
+          message: "How many would you like to add?",
+          validate: function(value) {
+            if (!isNaN(value)) {
+              return true;
+            }
+            return false;
+
+          }
+        }
+      ])
+      .then(function(answer) {
+        connection.query(
+          "UPDATE products SET ? WHERE ?",
+          [
+            {
+              stock_quantity: answer.addQuantity 
+            },
+            {
+              product_name: answer.addInventory
+            }
+          ],
+          function(error) {
+            if (error) throw error;
+            console.log("UPDATED");
+            start();
+          }
+        )
+      })
+  })
+}
