@@ -30,7 +30,7 @@ function start() {
         type: "input",
         message: "Please enter the product ID of the item you wish to buy",
         validate: function (value) {
-          if (!isNaN(value) && value > 0 && value < 10) {
+          if (!isNaN(value) && value > 0 && value <= 10) {
             return true;
           } else
             return false;
@@ -49,43 +49,42 @@ function start() {
       }
     ])
     .then(function (answer) {
+      let selectedProduct;
+
       connection.query("SELECT * FROM products", function (err, results) {
-
-        let selectedProduct;
-
+        
         // find selected product in database
         for (let i = 0; i < results.length; i++) {
           if (results[i].item_id === answer.productID) {
             selectedProduct = results[i];
           }
-          // check quantity of selected item
-          if (selectedProduct.stock_quantity > parseInt(answer.quantity)) {
+        }
+      })
+      // check quantity of selected item
+      if (selectedProduct.stock_quantity > parseInt(answer.quantity)) {
 
-            // if enough in stock update db and inform customer of successful purchase
-            connection.query(
-              "UPDATE products SET ? WHERE ?",
-              [{
-                  quantity: quantity - answer.quantity
-                },
-                {
-                  item_id: selectedProduct.item_id
-                }
-              ],
-              function (error) {
-                if (error) throw error;
-                console.log("Item successfully purchased!")
-                start();
-              }
-
-            )
-
-          } else {
-            console.log("There are not enough in stock");
+        // if enough in stock update db and inform customer of successful purchase
+        connection.query(
+          "UPDATE products SET ? WHERE ?",
+          [{
+              quantity: quantity - answer.quantity
+            },
+            {
+              item_id: selectedProduct.item_id
+            }
+          ],
+          function (error) {
+            if (error) throw error;
+            console.log("Item successfully purchased!")
             start();
           }
-        }
 
+        )
 
-      })
+      } else {
+        console.log("There are not enough in stock");
+        start();
+      }
+
     })
 }
