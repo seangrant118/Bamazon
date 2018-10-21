@@ -115,11 +115,21 @@ function add() {
         }
       ])
       .then(function(answer) {
+
+        // select item from the table
+        let selected;
+        for (let i = 0; i < results.length; i++) {
+          if (results[i].product_name === answer.addInventory) {
+            selected = results[i]
+          }
+        }
+
         connection.query(
           "UPDATE products SET ? WHERE ?",
           [
             {
-              stock_quantity: answer.addQuantity 
+              // add new inventory to old stock quantity
+              stock_quantity: parseInt(answer.addQuantity) + parseInt(selected.stock_quantity)
             },
             {
               product_name: answer.addInventory
