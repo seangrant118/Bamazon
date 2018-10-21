@@ -53,19 +53,20 @@ function start() {
 
         // get info from database
 
-        let selected = results;
+        let selected;
 
         for (var i = 0; i < results.length; i++) {
-          if (results[i].item_id === answer.productID) {
+          if (results[i].item_id === parseInt(answer.productID)) {
             selected = results[i];
           } 
         }
 
         // check quantity in database
-        if (selected.stock_quantity >= answer.quantity) {
+        if (selected.stock_quantity >= parseInt(answer.quantity)) {
           connection.query(
             "UPDATE products SET ? WHERE ?",
-            [{
+            [
+              {
                 stock_quantity: selected.stock_quantity - answer.quantity
               },
               {
@@ -78,6 +79,9 @@ function start() {
               start();
             }
           )
+        } else {
+          console.log("Insufficient Quantity");
+          start();
         }
       })
     })
