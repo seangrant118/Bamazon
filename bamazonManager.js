@@ -21,6 +21,7 @@ connection.connect(function (err) {
   start();
 })
 
+// function to start prompt
 function start() {
   inquirer
     .prompt({
@@ -30,6 +31,8 @@ function start() {
       choices: ["View Products for Sale", "View Low Inventory", "Add to Inventory", "Add New Product"]
     })
     .then(function(answer) {
+
+      // switch case to run function according to selection
       switch(answer.managerPrompt) {
         case "View Products for Sale":
           view()
@@ -45,4 +48,19 @@ function start() {
           break;
       }
     })
+}
+
+// function to view products for sale
+function view() {
+  connection.query("SELECT * FROM products", function(err, results) {
+    for (let i = 0; i < results.length; i++) {
+      console.log(`
+      Product id: ${results[i].item_id}
+      Product Name: ${results[i].product_name}
+      Department: ${results[i].department_name}
+      Price: ${results[i].price}
+      Quantity: ${results[i].stock_quantity}`)
+    }
+    start();
+  })
 }
