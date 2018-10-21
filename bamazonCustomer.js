@@ -49,42 +49,36 @@ function start() {
       }
     ])
     .then(function (answer) {
-      let selectedProduct;
-
       connection.query("SELECT * FROM products", function (err, results) {
-        
-        // find selected product in database
-        for (let i = 0; i < results.length; i++) {
+
+        // get info from database
+
+        let selected = results;
+
+        for (var i = 0; i < results.length; i++) {
           if (results[i].item_id === answer.productID) {
-            selectedProduct = results[i];
-          }
+            selected = results[i];
+          } 
+        }
+
+        // check quantity in database
+        if (selected.stock_quantity >= answer.quantity) {
+          connection.query(
+            "UPDATE products SET ? WHERE ?",
+            [{
+                stock_quantity: selected.stock_quantity - answer.quantity
+              },
+              {
+                item_id: selected.item_id
+              }
+            ],
+            function (error) {
+              if (error) throw err;
+              console.log("Successful Purchase!");
+              start();
+            }
+          )
         }
       })
-      // check quantity of selected item
-      if (selectedProduct.stock_quantity > parseInt(answer.quantity)) {
-
-        // if enough in stock update db and inform customer of successful purchase
-        connection.query(
-          "UPDATE products SET ? WHERE ?",
-          [{
-              quantity: quantity - answer.quantity
-            },
-            {
-              item_id: selectedProduct.item_id
-            }
-          ],
-          function (error) {
-            if (error) throw error;
-            console.log("Item successfully purchased!")
-            start();
-          }
-
-        )
-
-      } else {
-        console.log("There are not enough in stock");
-        start();
-      }
-
     })
 }
